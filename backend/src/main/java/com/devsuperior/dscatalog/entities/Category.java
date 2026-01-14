@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @Getter
 @Entity
@@ -40,14 +41,13 @@ public class Category {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Category other = (Category) o;
-        return id != null && id.equals(other.id);
+        Category category = (Category) o;
+        return Objects.equals(id, category.id);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hashCode(id);
     }
 }
