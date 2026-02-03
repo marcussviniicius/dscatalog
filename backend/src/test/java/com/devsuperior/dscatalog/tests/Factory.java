@@ -2,8 +2,8 @@ package com.devsuperior.dscatalog.tests;
 
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
-import dto.CategoryDTO;
-import dto.ProductDTO;
+import com.devsuperior.dscatalog.dto.CategoryDTO;
+import com.devsuperior.dscatalog.dto.ProductDTO;
 
 import java.time.Instant;
 

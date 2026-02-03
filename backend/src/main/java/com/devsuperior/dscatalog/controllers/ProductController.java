@@ -1,7 +1,7 @@
 package com.devsuperior.dscatalog.controllers;
 
 import com.devsuperior.dscatalog.services.ProductService;
-import dto.ProductDTO;
+import com.devsuperior.dscatalog.dto.ProductDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
