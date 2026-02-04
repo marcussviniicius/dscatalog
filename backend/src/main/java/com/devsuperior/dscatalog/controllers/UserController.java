@@ -1,8 +1,10 @@
 package com.devsuperior.dscatalog.controllers;
 
 import com.devsuperior.dscatalog.dto.UserInsertDTO;
+import com.devsuperior.dscatalog.dto.UserUpdateDTO;
 import com.devsuperior.dscatalog.services.UserService;
 import com.devsuperior.dscatalog.dto.UserDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +34,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> insert(@RequestBody UserInsertDTO dto){
+    public ResponseEntity<UserDTO> insert(@Valid @RequestBody UserInsertDTO dto){
         UserDTO newDto = userService.insert(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(newDto.getId()).toUri();
@@ -41,9 +43,9 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UserDTO dto){
-        dto = userService.update(id, dto);
-        return ResponseEntity.ok().body(dto);
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto){
+        UserDTO newDto = userService.update(id, dto);
+        return ResponseEntity.ok().body(newDto);
     }
 
     @DeleteMapping("/{id}")
