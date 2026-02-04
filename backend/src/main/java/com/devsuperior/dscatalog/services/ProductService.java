@@ -30,12 +30,6 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
-    public List<ProductDTO> findAll(){
-        List<Product> list = productRepository.findAll();
-        return list.stream().map(x -> new ProductDTO(x)).collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
     public Page<ProductDTO> findAllPaged(Pageable pageable) {
         Page<Product> list = productRepository.findAll(pageable);
         return list.map(x -> new ProductDTO(x));
