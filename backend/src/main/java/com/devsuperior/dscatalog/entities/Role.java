@@ -1,34 +1,30 @@
 package com.devsuperior.dscatalog.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.Objects;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
 @Entity
 @Table(name = "tb_role")
-public class Role {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Role implements GrantedAuthority {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @Getter @Setter
     private Long id;
+
+    @Setter
     private String authority;
 
     @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Role role = (Role) o;
-        return Objects.equals(id, role.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
+    public String getAuthority() {
+        return authority;
     }
 }
+
 
 
