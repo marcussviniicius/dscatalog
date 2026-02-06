@@ -8,14 +8,13 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2Token;
@@ -63,31 +62,34 @@ public class AuthorizationServerConfig {
     @Value("${security.jwt.duration}")
     private Integer jwtDurationSeconds;
 
-    @Autowired
-    private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
-
     @Bean
     @Order(2)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain authorizationServerSecurityFilterChain(
+            HttpSecurity http,
+            OAuth2AuthorizationService authorizationService,
+            OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator,
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder
+    ) throws Exception {
 
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 
-        http
-                .getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .tokenEndpoint(tokenEndpoint -> tokenEndpoint
-                        .accessTokenRequestConverter(
-                                new CustomPasswordAuthenticationConverter())
+                        .accessTokenRequestConverter(new CustomPasswordAuthenticationConverter())
                         .authenticationProvider(
                                 new CustomPasswordAuthenticationProvider(
-                                        authorizationService(),
-                                        tokenGenerator(),
+                                        authorizationService,
+                                        tokenGenerator,
                                         userDetailsService,
-                                        passwordEncoder()
+                                        passwordEncoder
                                 )
                         )
                 );
 
-        http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+        http.oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(Customizer.withDefaults())
+        );
 
         return http.build();
     }
@@ -103,25 +105,21 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public RegisteredClientRepository registeredClientRepository() {
-
-        RegisteredClient registeredClient = RegisteredClient
+    public RegisteredClientRepository registeredClientRepository(
+            PasswordEncoder passwordEncoder
+    ) {
+        RegisteredClient client = RegisteredClient
                 .withId(UUID.randomUUID().toString())
                 .clientId(clientId)
-                .clientSecret(passwordEncoder().encode(clientSecret))
+                .clientSecret(passwordEncoder.encode(clientSecret))
+                .authorizationGrantType(new AuthorizationGrantType("password"))
                 .scope("read")
                 .scope("write")
-                .authorizationGrantType(new AuthorizationGrantType("password"))
                 .tokenSettings(tokenSettings())
                 .clientSettings(clientSettings())
                 .build();
 
-        return new InMemoryRegisteredClientRepository(registeredClient);
+        return new InMemoryRegisteredClientRepository(client);
     }
 
     @Bean
@@ -143,12 +141,13 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
-    public OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator() {
-
-        NimbusJwtEncoder jwtEncoder = new NimbusJwtEncoder(jwkSource());
-
+    public OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator(
+            JWKSource<SecurityContext> jwkSource,
+            OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer
+    ) {
+        NimbusJwtEncoder jwtEncoder = new NimbusJwtEncoder(jwkSource);
         JwtGenerator jwtGenerator = new JwtGenerator(jwtEncoder);
-        jwtGenerator.setJwtCustomizer(tokenCustomizer());
+        jwtGenerator.setJwtCustomizer(tokenCustomizer);
 
         OAuth2AccessTokenGenerator accessTokenGenerator =
                 new OAuth2AccessTokenGenerator();
@@ -212,4 +211,3 @@ public class AuthorizationServerConfig {
         }
     }
 }
-
