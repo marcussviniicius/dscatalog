@@ -48,7 +48,8 @@ public class ResourceServerConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.GET, "/products").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products", "/products/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/categories", "/categories/*").permitAll()
                         .requestMatchers("/oauth2/**", "/.well-known/**").permitAll()
                         .anyRequest().authenticated()
                 )
