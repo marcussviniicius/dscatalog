@@ -1,5 +1,6 @@
 package com.devsuperior.dscatalog.controllers;
 
+import com.devsuperior.dscatalog.projections.ProductProjection;
 import com.devsuperior.dscatalog.services.ProductService;
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import lombok.AllArgsConstructor;
@@ -20,8 +21,11 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable){
-        Page<ProductDTO> list = productService.findAllPaged(pageable);
+    public ResponseEntity<Page<ProductDTO>> findAll(
+            @RequestParam(value = "name", defaultValue = "") String name,
+            @RequestParam(value = "categoryId", defaultValue = "0") String categoryId,
+            Pageable pageable){
+        Page<ProductDTO> list = productService.findAllPaged(name, categoryId, pageable);
         return ResponseEntity.ok().body(list);
     }
 
