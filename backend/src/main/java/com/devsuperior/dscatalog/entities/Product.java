@@ -1,5 +1,6 @@
 package com.devsuperior.dscatalog.entities;
 
+import com.devsuperior.dscatalog.projections.IdProjection;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import java.util.Set;
 @Entity
 @Table(name = "tb_product")
 @NoArgsConstructor
-public class Product {
+public class Product implements IdProjection<Long> {
 
     @Id
     @Setter
@@ -61,5 +62,10 @@ public class Product {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    @Override
+    public Long getId() {
+        return id;
     }
 }
